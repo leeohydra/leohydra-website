@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const MESSAGE_MAX_LENGTH = 150;
+
 interface ContactFormProps {
   intent: "GENERAL_CONTACT" | "ARTWORK_INQUIRY" | "CATALOGUE_REQUEST" | "PROJECT_REQUEST";
   artworkSlug?: string;
@@ -16,25 +18,66 @@ export default function ContactForm({ intent, artworkSlug, artworkTitle }: Conta
     country: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Placeholder submit handler
-    console.log("Form submitted:", {
-      ...formData,
-      intent,
-      artworkSlug,
-      artworkTitle,
-    });
-    
+    if (isSubmitting) return;
+    if (formData.message.length > MESSAGE_MAX_LENGTH) return;
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setSubmitMessage("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          country: formData.country,
+          message: formData.message,
+          intent,
+          artworkSlug: artworkSlug ?? undefined,
+          artworkTitle: artworkTitle ?? undefined,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        setSubmitStatus("error");
+        setSubmitMessage(data.error || "Something went wrong. Please try again.");
+        return;
+      }
+      setSubmitStatus("success");
+      if (intent === "CATALOGUE_REQUEST") {
+        setSubmitMessage(
+          "Thank you for your interest. All catalogue requests are personally reviewed. If your request aligns, our team will reach out."
+        );
+      } else {
+        setSubmitMessage("Thank you. Your inquiry has been received.");
+      }
+      
+      setFormData({ name: "", email: "", country: "", message: "" });
+    } catch {
+      setSubmitStatus("error");
+      setSubmitMessage("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
+    const value = e.target.name === "message"
+      ? e.target.value.slice(0, MESSAGE_MAX_LENGTH)
+      : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
   };
 
@@ -151,20 +194,35 @@ export default function ContactForm({ intent, artworkSlug, artworkTitle }: Conta
           value={formData.message}
           onChange={handleChange}
           required
+          maxLength={MESSAGE_MAX_LENGTH}
           rows={6}
           placeholder="Message"
           className="w-full px-4 py-3 bg-white border border-[#d4c9b8] text-[#0f172a] placeholder:text-[#64748b] focus:outline-none focus:border-[#7c2d3f] transition-colors text-sm"
-
         />
+        <div className="mt-1 flex items-center justify-between text-xs text-[#64748b]">
+          <span>{formData.message.length} / {MESSAGE_MAX_LENGTH}</span>
+          {formData.message.length >= MESSAGE_MAX_LENGTH && (
+            <span className="text-[#7c2d3f] font-medium">
+              Character limit reached.
+            </span>
+          )}
+        </div>
       </div>
+
+      {submitStatus !== "idle" && (
+        <p className="text-sm">
+          {submitMessage}
+        </p>
+      )}
 
       {/* Submit Button */}
       <div className="pt-2">
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full px-8 py-3 bg-[#7c2d3f] text-[#fefcf8] font-medium text-sm tracking-wide hover:bg-[#8b2635] transition-colors"
         >
-          Send message
+          {isSubmitting ? "Sending…" : "Send message"}
         </button>
       </div>
     </form>

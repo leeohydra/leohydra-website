@@ -1,4 +1,5 @@
 import ContactForm from "@/components/ContactForm";
+import NewsletterForm from "@/components/NewsletterForm";
 
 export default function Contact() {
   return (
@@ -21,24 +22,7 @@ export default function Contact() {
               exhibitions.
             </p>
             
-            <form className="flex flex-col sm:flex-row gap-3 pt-6 max-w-lg mx-auto">
-              <label className="sr-only" htmlFor="newsletter-email">
-                Email
-              </label>
-              <input
-                id="newsletter-email"
-                type="email"
-                required
-                placeholder="E-mail"
-                className="flex-1 px-4 py-3 bg-[#1e293b] border border-[#334155] text-[#fefcf8] placeholder:text-[#64748b] focus:outline-none focus:border-[#475569] transition-colors text-sm"
-              />
-              <button
-                type="submit"
-                className="px-8 py-3 bg-[#7c2d3f] text-[#fefcf8] font-medium text-sm tracking-wide hover:bg-[#8b2635] transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </div>
       </section>

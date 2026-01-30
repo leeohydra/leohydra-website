@@ -5,13 +5,13 @@ import ArtworkCard from "@/components/ArtworkCard";
 
 const artworks = [
   {
-    slug: "chromatic",
+    slug: "fractured_spectrum",
     // image: "https://via.placeholder.com/400x400",
-    image: "/artworks/chromatic.jpg",
+    image: "/artworks/fractured_spectrum.jpg",
 
     status: "Available",
     year: "2024",
-    title: "Chromatic",
+    title: "Fractured Spectrum",
     description: [
       "Original artwork on okume wood canvas.",
       "Size: 100 x 80 cms (39'' x 31'')",
