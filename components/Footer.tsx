@@ -23,7 +23,12 @@ export default function Footer() {
 
         <div className="flex flex-col gap-2 text-xs">
           <Link href="/contact" className="link-editorial">Newsletter</Link>
-          <a href="#" target="_blank" rel="noreferrer" className="link-editorial">
+          <a
+            href="https://www.instagram.com/leeohydra/"
+            target="_blank"
+            rel="noreferrer"
+            className="link-editorial"
+          >
             Instagram
           </a>
         </div>
