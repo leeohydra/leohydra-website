@@ -6,6 +6,7 @@ import { lastKnownMousePosition } from "@/lib/mousePosition";
 const ZOOM = 7.5;
 const LENS_SIZE = 180;
 const LENS_DELAY = 80;
+const MAGNIFIER_MIN_WIDTH_PX = 768;
 
 interface ArtworkImageWithMagnifierProps {
   src: string;
@@ -15,12 +16,23 @@ interface ArtworkImageWithMagnifierProps {
 export default function ArtworkImageWithMagnifier({ src, alt }: ArtworkImageWithMagnifierProps) {
   const [showLens, setShowLens] = useState(false);
   const [cursor, setCursor] = useState({ x: 0, y: 0 });
+  const [magnifierEnabled, setMagnifierEnabled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // On mount (e.g. after navigating from listing), if the mouse is already over
-  // the image, show the lens so zoom works without moving the cursor.
+  // Enable magnifier only on viewports >= MAGNIFIER_MIN_WIDTH_PX (not mobile).
   useEffect(() => {
+    const mq = window.matchMedia(`(min-width: ${MAGNIFIER_MIN_WIDTH_PX}px)`);
+    const handler = () => setMagnifierEnabled(mq.matches);
+    setMagnifierEnabled(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // On mount (e.g. after navigating from listing), if the mouse is already over
+  // the image, show the lens so zoom works without moving the cursor. Only when magnifier enabled.
+  useEffect(() => {
+    if (!magnifierEnabled) return;
     const el = containerRef.current;
     if (!el) return;
     const checkMouseInside = () => {
@@ -40,13 +52,14 @@ export default function ArtworkImageWithMagnifier({ src, alt }: ArtworkImageWith
       cancelAnimationFrame(raf);
       clearTimeout(t);
     };
-  }, []);
+  }, [magnifierEnabled]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full inline-block"
       onMouseEnter={() => {
+        if (!magnifierEnabled) return;
         timeoutRef.current = setTimeout(() => setShowLens(true), LENS_DELAY);
       }}
       onMouseLeave={() => {
@@ -54,7 +67,7 @@ export default function ArtworkImageWithMagnifier({ src, alt }: ArtworkImageWith
         setShowLens(false);
       }}
       onMouseMove={(e) => {
-        if (!containerRef.current) return;
+        if (!magnifierEnabled || !containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
         setCursor({
           x: e.clientX - rect.left,
@@ -69,7 +82,7 @@ export default function ArtworkImageWithMagnifier({ src, alt }: ArtworkImageWith
         draggable={false}
       />
 
-      {showLens && containerRef.current && (
+      {magnifierEnabled && showLens && containerRef.current && (
         <div
           className="pointer-events-none absolute z-10"
           style={{
