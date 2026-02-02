@@ -35,42 +35,59 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
   // Alternate layout for visual interest
   const isAlternate = index % 2 === 1;
 
+  const imageDelay = index * 0.1;
+  const textDelay = index * 0.1 + 0.08;
+
   return (
     <div
       ref={cardRef}
-      className={`grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center ${
-        isVisible ? "animate-slide-up" : "opacity-0"
-      }`}
-      style={{ animationDelay: `${index * 0.1}s` }}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center"
     >
 
       {/* --------------------------------
-          Image + Magnifier
+          Image (staggered reveal + hover overlay)
       -------------------------------- */}
-      <Link
-        href={`/artworks/${artwork.slug}`}
-        className={`relative w-full aspect-[4/5] bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_20px_60px_rgba(124,45,63,0.15)] block focus:outline-none ${
+      <div
+        className={`${isVisible ? "animate-slide-up" : "opacity-0"} ${
           isAlternate ? "lg:col-start-7 lg:col-end-13 lg:order-last" : "lg:col-start-1 lg:col-end-7"
         }`}
-        style={{
-          border: "1px solid rgba(212, 201, 184, 0.2)",
-        }}
-        aria-label={`View ${artwork.title}`}
+        style={{ animationDelay: `${imageDelay}s` }}
       >
-        <img
-          src={artwork.image}
-          alt={artwork.title}
-          className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
-          draggable={false}
-        />
-      </Link>
+        <Link
+          href={`/artworks/${artwork.slug}`}
+          className="group relative w-full aspect-[4/5] bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_20px_60px_rgba(124,45,63,0.15)] block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7c2d3f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf8f3] focus-visible:rounded-sm"
+          style={{
+            border: "1px solid rgba(212, 201, 184, 0.2)",
+          }}
+          aria-label={`View ${artwork.title}`}
+        >
+          <img
+            src={artwork.image}
+            alt={artwork.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            draggable={false}
+          />
+          {/* Hover overlay: "View artwork" */}
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-[#0f172a]/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            aria-hidden
+          >
+            <span className="text-[#fefcf8] text-xs tracking-[0.2em] uppercase font-medium">
+              View artwork
+            </span>
+          </div>
+        </Link>
+      </div>
 
       {/* --------------------------------
-          Text column
+          Text column (staggered reveal)
       -------------------------------- */}
-      <div className={`max-w-lg space-y-8 lg:px-8 ${
-        isAlternate ? "lg:col-start-1 lg:col-end-6 lg:order-first" : "lg:col-start-7 lg:col-end-13"
-      }`}>
+      <div
+        className={`max-w-lg space-y-8 lg:px-8 ${isVisible ? "animate-slide-up" : "opacity-0"} ${
+          isAlternate ? "lg:col-start-1 lg:col-end-6 lg:order-first" : "lg:col-start-7 lg:col-end-13"
+        }`}
+        style={{ animationDelay: `${textDelay}s` }}
+      >
         <div className={`flex items-center gap-4 lg:flex-col gap-2 ${
           isAlternate ? "lg:items-end" : "lg:items-start"
         }`}>
@@ -89,7 +106,7 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
         }`}>
           <Link
             href={`/artworks/${artwork.slug}`}
-            className="hover:text-[#7c2d3f] transition-colors focus:outline-none"
+            className="hover:text-[#7c2d3f] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7c2d3f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf8f3] focus-visible:rounded-sm rounded-sm"
           >
             {artwork.title}
           </Link>
@@ -126,7 +143,7 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
         {artwork.status === "Available" && (
           <Link
             href={`/inquire-artwork?artwork=${artwork.slug}&title=${encodeURIComponent(artwork.title)}`}
-            className={`inline-block w-full lg:w-auto px-8 py-3 bg-[#7c2d3f] text-[#fefcf8] font-medium text-sm tracking-wide hover:bg-[#8b2635] transition-all duration-300 border border-[#7c2d3f] hover:shadow-lg text-center ${
+            className={`inline-block w-full lg:w-auto px-8 py-3 bg-[#7c2d3f] text-[#fefcf8] font-medium text-sm tracking-wide hover:bg-[#8b2635] transition-all duration-300 border border-[#7c2d3f] hover:shadow-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7c2d3f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf8f3] ${
               isAlternate ? "lg:ml-auto" : ""
             }`}
           >
@@ -137,7 +154,7 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
         {artwork.status === "Sold" && (
           <Link
             href="/request-catalogue"
-            className={`inline-block text-sm text-[#7c2d3f] hover:text-[#8b2635] transition-colors border-b border-transparent hover:border-[#7c2d3f] pb-1 ${
+            className={`inline-block text-sm text-[#7c2d3f] hover:text-[#8b2635] transition-colors border-b border-transparent hover:border-[#7c2d3f] pb-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7c2d3f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#faf8f3] rounded-sm ${
               isAlternate ? "lg:ml-auto" : ""
             }`}
           >
