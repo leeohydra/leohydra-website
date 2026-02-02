@@ -3,15 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import type { Artwork } from "@/lib/artworks";
+
 interface ArtworkCardProps {
-  artwork: {
-    slug: string;
-    image: string;
-    status: string;
-    year: string;
-    title: string;
-    description: string[];
-  };
+  artwork: Artwork;
   index: number;
 }
 
@@ -37,22 +32,6 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
     return () => observer.disconnect();
   }, []);
 
-  /* --------------------------------
-     Magnifier configuration
-  -------------------------------- */
-  const ZOOM = 7.5;        // 🔧 change this to experiment (5–8)
-  const LENS_SIZE = 180;   // px
-  const LENS_DELAY = 80;   // ms
-
-  /* --------------------------------
-     Magnifier state
-  -------------------------------- */
-  const [showLens, setShowLens] = useState(false);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   // Alternate layout for visual interest
   const isAlternate = index % 2 === 1;
 
@@ -68,74 +47,23 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
       {/* --------------------------------
           Image + Magnifier
       -------------------------------- */}
-      <div
-        ref={containerRef}
-        className={`relative w-full aspect-[4/5] bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_20px_60px_rgba(124,45,63,0.15)] ${
+      <Link
+        href={`/artworks/${artwork.slug}`}
+        className={`relative w-full aspect-[4/5] bg-gradient-to-br from-[#0f172a] to-[#1e293b] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_20px_60px_rgba(124,45,63,0.15)] block focus:outline-none ${
           isAlternate ? "lg:col-start-7 lg:col-end-13 lg:order-last" : "lg:col-start-1 lg:col-end-7"
         }`}
         style={{
           border: "1px solid rgba(212, 201, 184, 0.2)",
         }}
-        onMouseEnter={() => {
-          timeoutRef.current = setTimeout(() => setShowLens(true), LENS_DELAY);
-        }}
-        onMouseLeave={() => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setShowLens(false);
-        }}
-        onMouseMove={(e) => {
-          const rect = containerRef.current!.getBoundingClientRect();
-          setCursor({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-          });
-        }}
+        aria-label={`View ${artwork.title}`}
       >
-        {/* Base image */}
         <img
           src={artwork.image}
           alt={artwork.title}
           className="w-full h-full object-cover transition-transform duration-700 hover:scale-[1.02]"
           draggable={false}
         />
-
-        {/* Magnifier lens */}
-        {showLens && containerRef.current && (
-          <div
-          className="pointer-events-none absolute z-10"
-          style={{
-            width: LENS_SIZE,
-            height: LENS_SIZE,
-            left: cursor.x - LENS_SIZE / 2,
-            top: cursor.y - LENS_SIZE / 2,
-            borderRadius: "50%",
-        
-            /* 🔍 Color-faithful zoom (pure image only) */
-            backgroundImage: `url(${artwork.image})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: `${ZOOM * 100}%`,
-            backgroundPosition: `
-              ${(cursor.x / containerRef.current.clientWidth) * 100}% 
-              ${(cursor.y / containerRef.current.clientHeight) * 100}%
-            `,
-        
-            /* 🫧 Soft edge (no color distortion) */
-            WebkitMaskImage:
-              "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-            maskImage:
-              "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-        
-            /* subtle depth */
-            boxShadow: "0 8px 28px rgba(0,0,0,0.18)",
-        
-            /* ✨ popup animation */
-            animation:
-              "lensPop 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards",
-          }}
-        />
-        
-        )}
-      </div>
+      </Link>
 
       {/* --------------------------------
           Text column
@@ -159,7 +87,12 @@ export default function ArtworkCard({ artwork, index }: ArtworkCardProps) {
         <h2 className={`text-3xl lg:text-4xl font-light tracking-tight leading-tight text-[#0f172a] ${
           isAlternate ? "lg:text-right" : ""
         }`}>
-          {artwork.title}
+          <Link
+            href={`/artworks/${artwork.slug}`}
+            className="hover:text-[#7c2d3f] transition-colors focus:outline-none"
+          >
+            {artwork.title}
+          </Link>
         </h2>
 
         <div className={`space-y-4 pt-4 border-t border-[#d4c9b8] ${
