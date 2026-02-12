@@ -126,14 +126,18 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (insertError || !lead?.id) {
-    recentSubmissions.delete(key);
+    console.error("SUPABASE INSERT ERROR:", insertError);
     return NextResponse.json(
       { error: "Failed to save submission" },
       { status: 500 }
-    );
-  }
+  );
+}
+
 
   const toEmail = process.env.CONTACT_TO_EMAIL;
+  console.log("RESEND KEY EXISTS:", !!process.env.RESEND_API_KEY);
+  console.log("FROM:", process.env.CONTACT_FROM_EMAIL);
+
   const fromEmail = process.env.CONTACT_FROM_EMAIL || "Contact <onboarding@resend.dev>";
 
   if (!process.env.RESEND_API_KEY) {

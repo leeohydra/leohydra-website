@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
   // so before the website goes live verify the domain and use it in the .env.local file
 
 
-  
+  console.log("CONTACT_FROM_EMAIL:", process.env.CONTACT_FROM_EMAIL);
+  console.log("RESEND_API_KEY EXISTS:", !!process.env.RESEND_API_KEY);
+
   const fromEmail = process.env.CONTACT_FROM_EMAIL;
   if (!fromEmail) {
     return NextResponse.json({ error: "Sender not configured" }, { status: 500 });
@@ -39,6 +41,8 @@ export async function POST(request: NextRequest) {
   const { error: insertError } = await supabase
     .from("newsletter_subscribers")
     .insert({ email: email.toLowerCase(), source: "contact_page" });
+  
+  console.error("NEWSLETTER INSERT ERROR:", insertError);
 
   const alreadyExists = insertError?.code === "23505";
   if (insertError && !alreadyExists) {
@@ -59,11 +63,13 @@ You'll receive studio updates, releases, and exhibitions from time to time.
   });
 
   if (sendError) {
-    return NextResponse.json(
-      { error: sendError.message || "Failed to send confirmation" },
-      { status: 500 }
-    );
-  }
+  console.error("RESEND SEND ERROR:", sendError);
+  return NextResponse.json(
+    { error: sendError.message || "Failed to send confirmation" },
+    { status: 500 }
+  );
+}
+
 
   return NextResponse.json({ success: true });
 }
