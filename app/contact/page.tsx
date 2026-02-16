@@ -6,13 +6,11 @@ export default function Contact() {
     <div className="min-h-screen bg-gradient-to-b from-[#fefcf8] via-[#faf8f3] to-[#f5f3ed]">
 
       {/* Newsletter Section - Full Width Dark */}
-      <section className="bg-[#0f172a] mt-8 lg:mt-8 py-16 lg:py-20 animate-slide-up">
-
-
+      <section className="bg-[#111111] mt-8 lg:mt-8 py-10 lg:py-12 animate-slide-up">
         <div className="container-reading mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center space-y-6">
             <p className="text-sm text-[#cbd5e1] uppercase tracking-wider font-light">
-              Keep me updated
+              
             </p>
             <h2 className="text-4xl lg:text-5xl font-light text-[#fefcf8] tracking-tight">
               Newsletter
