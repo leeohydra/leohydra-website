@@ -1,9 +1,7 @@
 export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/notifications/email-service";
 import { supabase } from "@/lib/supabase";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -55,20 +53,21 @@ You'll receive studio updates, releases, and exhibitions from time to time.
 
 — LeoHydra`;
 
-  const { error: sendError } = await resend.emails.send({
+try {
+  await sendEmail({
     from: fromEmail,
     to: [email],
     subject,
     text: textBody,
   });
-
-  if (sendError) {
-  console.error("RESEND SEND ERROR:", sendError);
+} catch (error) {
+  console.error("RESEND SEND ERROR:", error);
   return NextResponse.json(
-    { error: sendError.message || "Failed to send confirmation" },
+    { error: error instanceof Error ? error.message : "Failed to send confirmation" },
     { status: 500 }
   );
 }
+
 
 
   return NextResponse.json({ success: true });

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/notifications/email-service";
 import { supabase } from "@/lib/supabase";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 // Duplicate protection: in-memory store (key -> timestamp of first submission)
 const recentSubmissions = new Map<string, number>();
@@ -168,27 +168,20 @@ export async function POST(request: NextRequest) {
   ].join("\n");
 
   try {
-    const { error } = await resend.emails.send({
+    await sendEmail({
       from: fromEmail,
       to: [toEmail],
       subject,
       text: textBody,
     });
-
-    if (error) {
-      recentSubmissions.delete(key);
-      return NextResponse.json(
-        { error: error.message || "Failed to send email" },
-        { status: 500 }
-      );
-    }
-
+  
     await supabase
       .from("leads")
       .update({ email_sent: true })
       .eq("id", lead.id);
-
+  
     return NextResponse.json({ success: true });
+  
   } catch (err) {
     recentSubmissions.delete(key);
     const message = err instanceof Error ? err.message : "Failed to send email";
@@ -197,4 +190,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  
 }
